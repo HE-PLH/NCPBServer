@@ -65,7 +65,7 @@ const FetchController = (app) => {
     app.get("/api/logs", (req, res) => {
         test(req, res);
     });
-    /*app.post("/api/users/verify", (req, res) => {
+    app.post("/api/users/verify", (req, res) => {
         findUser(req, res);
     });
 
@@ -118,7 +118,7 @@ const FetchController = (app) => {
 
     app.post("/api/status/update", (req, res) => {
         new TableMaster("status", StatusModel).update(req, res);
-    });*/
+    });
 };
 
 module.exports = {
