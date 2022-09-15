@@ -18,7 +18,7 @@ const test = async (req, res) => {
 
     const users = await zkInstance.getUsers()
 
-    const attendances = await zkInstance.getAttendances('192.168.0.100', (percent, total)=>{
+    const attendances = await zkInstance.getAttendances('192.168.0.100', (percent, total) => {
         // this callbacks take params is the percent of data downloaded and total data need to download
     })
 
@@ -26,7 +26,7 @@ const test = async (req, res) => {
 
     // let temp_attendance = attendances;
 
-    res.send({
+    return ({
         info: attendances.data,
         users
     })
@@ -43,27 +43,38 @@ const test = async (req, res) => {
 // test()
 
 
-
-// const {
-//     TableMaster,
-//     FarmModel,
-//     findUser,
-//     AllUsersModel,
-//     UserTable,
-//     RolesModel,
-//     ApartmentModel,
-//     HouseModel,
-//     BillsModel,
-//     StatusModel,
-//     ConditionModel,
-//     ConditionStateModel,
-//     TenantOutModel
-// } = require("../models/models");
+const {
+    TableMaster,
+    findUser,
+    AllUsersModel,
+    UserTable,
+    RolesModel,
+    StatusModel,
+    LogsModel,
+    getPeriodLogs
+} = require("../models/models");
 
 
 const FetchController = (app) => {
     app.get("/api/logs", (req, res) => {
-        test(req, res);
+        test(req, res).then((logsObject) => {
+            if (logsObject.info.length) {
+                let temp_users = {}
+                for (let i = 0; i < logsObject.users.data.length; i++) {
+                    temp_users[logsObject.users.data[i].userId] = logsObject.users.data[i].name
+                }
+                for (let i = 0; i < logsObject.info.length; i++) {
+                    delete logsObject.info[i].ip;
+                    let temp = new Date(logsObject.info[i].recordTime);
+                    logsObject.info[i].Name = temp_users[logsObject.info[i].deviceUserId]
+                    logsObject.info[i].Date = temp.toLocaleDateString('en-CA')
+                    logsObject.info[i].Time = temp.toLocaleTimeString()
+                    delete logsObject.info[i].recordTime;
+                }
+                req.body=logsObject.info;
+                new UserTable("logs", LogsModel).add(req, res);
+            }
+        })
     });
     app.post("/api/users/verify", (req, res) => {
         findUser(req, res);
@@ -86,7 +97,6 @@ const FetchController = (app) => {
     });
 
 
-
     app.get("/api/role", (req, res) => {
         new TableMaster("role", RolesModel).retrieve(req, res);
     });
@@ -104,6 +114,27 @@ const FetchController = (app) => {
     });
 
 
+    app.get("/api/biometriclogs", (req, res) => {
+        new TableMaster("biometriclogs", LogsModel).retrieve(req, res);
+    });
+
+    app.post("/api/biometriclogs/", (req, res) => {
+        new TableMaster("biometriclogs", LogsModel).add(req, res);
+    });
+
+    app.post("/api/biometriclogs/delete", (req, res) => {
+        new TableMaster("biometriclogs", LogsModel).delete(req, res);
+    });
+
+    app.post("/api/biometriclogs/update", (req, res) => {
+        new TableMaster("biometriclogs", LogsModel).update(req, res);
+    });
+
+    app.post("/api/biometriclogs/deleteAll", (req, res) => {
+        new TableMaster("biometriclogs", LogsModel).deleteAll(req, res);
+    });
+
+
     app.get("/api/status", (req, res) => {
         new TableMaster("status", StatusModel).retrieve(req, res);
     });
@@ -118,6 +149,11 @@ const FetchController = (app) => {
 
     app.post("/api/status/update", (req, res) => {
         new TableMaster("status", StatusModel).update(req, res);
+    });
+
+
+    app.post("/api/periodicLogs/", (req, res) => {
+        getPeriodLogs(req, res);
     });
 };
 

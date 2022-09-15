@@ -1,5 +1,3 @@
-const Methods = require("../utilities/utilities");
-
 const db = require("../database/database");
 const {v4} = require("uuid");
 // const { default: axios } = require("axios");
@@ -93,18 +91,21 @@ let ItemsSchema = new Schema({
 let LogSchema = new Schema({
     Id: {
         type: String,
-        unique: true,
     },
     Name: {
         type: String
     },
     userSn: {
-        type: String
+        type: String,
+        unique: true,
     },
     deviceUserId: {
         type: String
     },
-    Name: {
+    Date: {
+        type: String
+    },
+    Time: {
         type: String
     }
 }, {versionKey: false});
@@ -133,7 +134,7 @@ function getSchemaObject(inputData) {
 }
 
 function addAutoIdIfShotlisted(inputData, table, mdl, res) {
-    const shotlistTables = ["matches", "game-types", "odd-types", "items"];
+    const shotlistTables = ["Logs", "game-types", "odd-types", "items"];
 
     const f = function (array, item) {
         if (array.length > 0) {
@@ -443,14 +444,14 @@ const findUser = async (req, res) => {
     })
 };
 
-const getPeriodMatches = (req, res, mdl) => {
+const getPeriodLogs = (req, res, mdl) => {
     let start_date = req.body.Start_date;
     let end_date = req.body.End_date;
 
     let date = new Date(end_date);
     let date1 = new Date(start_date);
 
-    MatchesModel.find({}, (err, docs) => {
+    LogsModel.find({}, (err, docs) => {
         if (err) {
             res.send({
                 message: "Error Occured",
@@ -461,7 +462,7 @@ const getPeriodMatches = (req, res, mdl) => {
 
         if (docs === null || docs.length === 0) {
             res.send({
-                message: "No Matches available",
+                message: "No Biometric Logs available",
                 info: docs,
             });
             // return 0;
@@ -482,64 +483,61 @@ const getPeriodMatches = (req, res, mdl) => {
 
         let result = {};
 
-        result.MatchesLength = docs.length;
-        result.Matches = [...docs];
+        const sortObject = o => Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {})
+        let table_head={};
+
+        let individualLogs = groupIn(docs)
+        result.groups = [];
+        for (let i in individualLogs) {
+            let t = {};
+            t["p/No"] = i;
+            t["Name"] = individualLogs[i][0].Name;
+            t["Id"] = individualLogs[i][0].Id;
+            t["_id"] = individualLogs[i][0]._id;
+            t.items=[];
+            let temp = groupIn(individualLogs[i], "userSn", "Date")
+
+            // temp_date[temp[0].Date] = {};
+            for (let j in temp) {
+                if (!table_head.hasOwnProperty(j)) {
+                    table_head[j] = "String";
+                }
+                let temp_date = {};
+                temp_date["Date"] = j;
+                let orderedLogs = temp[j].sort((a, b) => {
+                    return a.Time > b.Time;
+                })
+                temp_date["startTime"] = orderedLogs[0].Time;
+                temp_date["endTime"] = orderedLogs[orderedLogs.length - 1].Time;
+                t.items.push(temp_date);
+            }
+            result.groups.push(t)
+
+        }
+        result.table_head = table_head;
+        result.LogsLength = docs.length;
+        result.Logs = [...docs];
         let len = docs.length;
         let counter = 0;
-
-
-        console.log(result.Matches)
-        GameModel.find({}, (err, docs) => {
-            if (err) {
-                res.send({
-                    message: "Error Occured",
-                    info: docs,
-                });
-                // return 0;
+        res.send(
+            {
+                info: result
             }
-
-            if (docs === null || docs.length === 0) {
-                res.send({
-                    message: "No Gametypes available",
-                    info: docs,
-                });
-                // return 0;
-            }
-
-            console.log(docs)
-            for (let i = 0; i < result.Matches.length; i++) {
-                for (let j = 0; j < docs.length; j++) {
-                    console.log(docs[j].Id, result.Matches[i].GameType);
-                    if (docs[j].Id === result.Matches[i].GameType) {
-                        console.log(docs[j])
-                        result.Matches[i]["GameTypeObj"] = docs[j];
-                        break;
-                    }
-                }
-            }
-
-            res.send(
-                {
-                    info: result
-                }
-            );
-
-
-        });
+        );
 
 
     });
     // }
 };
 
-const getTodayMatches = (req, res, mdl) => {
+const getTodayLogs = (req, res, mdl) => {
     let date1 = new Date(new Date().setDate(new Date().getDate() - 1));
 
     let date = new Date();
 
     console.log(date, date1)
 
-    MatchesModel.find({}, (err, docs) => {
+    LogsModel.find({}, (err, docs) => {
         if (err) {
             res.send({
                 message: "Error Occured",
@@ -550,7 +548,7 @@ const getTodayMatches = (req, res, mdl) => {
 
         if (docs === null || docs.length === 0) {
             res.send({
-                message: "No Matches available",
+                message: "No Logs available",
                 info: docs,
             });
             // return 0;
@@ -571,8 +569,8 @@ const getTodayMatches = (req, res, mdl) => {
 
         let result = {};
 
-        result.MatchesLength = docs.length;
-        const Matches = docs;
+        result.LogsLength = docs.length;
+        const Logs = docs;
         let len = docs.length;
         let counter = 0;
 
@@ -593,14 +591,14 @@ const getTodayMatches = (req, res, mdl) => {
                 // return 0;
             }
 
-            result.Matches = [];
-            for (let i = 0; i < Matches.length; i++) {
+            result.Logs = [];
+            for (let i = 0; i < Logs.length; i++) {
                 for (let j = 0; j < docs.length; j++) {
-                    if (docs[j].Id === Matches[i].GameType) {
+                    if (docs[j].Id === Logs[i].GameType) {
                         let temp = {};
-                        for(let x in Matches[i]){
-                            if (Matches[i].hasOwnProperty(x)) {
-                                temp[x] = Matches[i][x];
+                        for (let x in Logs[i]) {
+                            if (Logs[i].hasOwnProperty(x)) {
+                                temp[x] = Logs[i][x];
                             }
                         }
 
@@ -609,7 +607,7 @@ const getTodayMatches = (req, res, mdl) => {
                         let tmp = {};
                         tmp = temp._doc;
                         tmp["GameTypeObj"] = temp.GameTypeObj;
-                        result.Matches.push(tmp);
+                        result.Logs.push(tmp);
                         break;
                     }
                 }
@@ -629,7 +627,7 @@ const getTodayMatches = (req, res, mdl) => {
     // }
 };
 
-const getFilteredMatches = (req, res, mdl) => {
+/*const getFilteredLogs = (req, res, mdl) => {
     let q = req.query;
 
     let my_query = {};
@@ -666,7 +664,7 @@ const getFilteredMatches = (req, res, mdl) => {
 
     console.log(my_query)
 
-    MatchesModel.find(my_query, (err, docs) => {
+    LogsModel.find(my_query, (err, docs) => {
         if (err) {
             res.send({
                 message: "Error Occured",
@@ -677,7 +675,7 @@ const getFilteredMatches = (req, res, mdl) => {
 
         if (docs === null || docs.length === 0) {
             res.send({
-                message: "No Matches available",
+                message: "No Logs available",
                 info: docs,
             });
             return 0;
@@ -685,8 +683,8 @@ const getFilteredMatches = (req, res, mdl) => {
 
         let result = {};
 
-        result.MatchesLength = docs.length;
-        const Matches = docs;
+        result.LogsLength = docs.length;
+        const Logs = docs;
         let len = docs.length;
         let counter = 0;
 
@@ -707,14 +705,14 @@ const getFilteredMatches = (req, res, mdl) => {
                 // return 0;
             }
 
-            result.Matches = [];
-            for (let i = 0; i < Matches.length; i++) {
+            result.Logs = [];
+            for (let i = 0; i < Logs.length; i++) {
                 for (let j = 0; j < docs.length; j++) {
-                    if (docs[j].Id === Matches[i].GameType) {
+                    if (docs[j].Id === Logs[i].GameType) {
                         let temp = {};
-                        for(let x in Matches[i]){
-                            if (Matches[i].hasOwnProperty(x)) {
-                                temp[x] = Matches[i][x];
+                        for(let x in Logs[i]){
+                            if (Logs[i].hasOwnProperty(x)) {
+                                temp[x] = Logs[i][x];
                             }
                         }
 
@@ -723,7 +721,7 @@ const getFilteredMatches = (req, res, mdl) => {
                         let tmp = {};
                         tmp = temp._doc;
                         tmp["GameTypeObj"] = temp.GameTypeObj;
-                        result.Matches.push(tmp);
+                        result.Logs.push(tmp);
                         break;
                     }
                 }
@@ -741,7 +739,23 @@ const getFilteredMatches = (req, res, mdl) => {
 
     });
     // }
-};
+};*/
+
+
+function groupIn(array, given = "userSn", group = "deviceUserId", q = 1) {
+    let obj_list = {};
+    let temp = {};
+    for (let i = 0; i < array.length; i++) {
+        if (!obj_list.hasOwnProperty(array[i][group])) {
+            obj_list[array[i][group]] = [];
+        }
+
+        if ((temp = array[i])) {
+            obj_list[array[i][group]].push(temp);
+        }
+    }
+    return obj_list;
+}
 
 
 module.exports = {
@@ -750,13 +764,8 @@ module.exports = {
     AllUsersModel,
     RolesModel,
     UserTable,
-    GameModel,
-    MatchesModel,
-    OddModel,
     StatusModel,
     ItemsModel,
-    PrivilegeModel,
-    getPeriodMatches,
-    getTodayMatches,
-    getFilteredMatches
+    LogsModel,
+    getPeriodLogs
 };
