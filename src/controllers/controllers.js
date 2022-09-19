@@ -42,6 +42,30 @@ const test = async (req, res) => {
 
 // test()
 
+/*// Initialize
+var ActiveDirectory = require('activedirectory');
+var config = {
+    url: 'ldap://dc.domain.com',
+    baseDN: 'dc=domain,dc=com'
+};
+var ad = new ActiveDirectory(config);
+var username = 'john.smith@domain.com';
+var password = 'password';
+// Authenticate
+ad.authenticate(username, password, function(err, auth) {
+    if (err) {
+        console.log('ERROR: '+JSON.stringify(err));
+        return;
+    }
+    if (auth) {
+        console.log('Authenticated!');
+    }
+    else {
+        console.log('Authentication failed!');
+    }
+});*/
+
+
 
 const {
     TableMaster,
@@ -65,14 +89,30 @@ const FetchController = (app) => {
                 }
                 for (let i = 0; i < logsObject.info.length; i++) {
                     delete logsObject.info[i].ip;
-                    let temp = new Date(logsObject.info[i].recordTime);
+                    let temp = new Date(logsObject.info[i].recordTime), t = temp.toLocaleTimeString(), d = temp.toLocaleDateString();
+                    logsObject.info[i].Id = logsObject.info[i].deviceUserId+d+t
                     logsObject.info[i].Name = temp_users[logsObject.info[i].deviceUserId]
-                    logsObject.info[i].Date = temp.toLocaleDateString('en-CA')
-                    logsObject.info[i].Time = temp.toLocaleTimeString()
+                    logsObject.info[i].Date = d
+                    logsObject.info[i].Time = t
                     delete logsObject.info[i].recordTime;
                 }
-                req.body=logsObject.info;
-                new UserTable("logs", LogsModel).add(req, res);
+                req.body = logsObject.info;
+                LogsModel.find({}, (err, docs) => {
+                    let to_add = []
+                    let temp = {}
+                    for (let i = 0; i < docs.length; i++) {
+                        temp[docs[i].Id] = true;
+                    }
+                    for (let i = 0; i < req.body.length; i++) {
+                        if (!temp[req.body[i].Id]){
+                            to_add.push(req.body[i])
+                        }
+                    }
+                    req.body = to_add
+                    new TableMaster("logs", LogsModel).add(req, res);
+                })
+
+
             }
         })
     });
