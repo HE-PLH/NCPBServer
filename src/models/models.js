@@ -453,9 +453,31 @@ const getPeriodLogs = (req, res, mdl) => {
     let date1 = new Date(start_date);
 
 
-    var a = moment([date.getFullYear(), date.getMonth(), date.getDay()]);
-    var b = moment([date1.getFullYear(), date1.getMonth(), date1.getDay()]);
+    /*var a = moment(end_date);
+    var b = moment(start_date);
     let _days = a.diff(b, 'days') // 1
+    console.log(_days)*/
+    let _days = 0;
+
+    const addDays = (date, days = 1) => {
+        const result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result;
+    };
+
+    const dateRange = (start, end, range = []) => {
+        if (start > end) return range;
+        const next = addDays(start, 1);
+        return dateRange(next, end, [...range, start]);
+    };
+
+    const range = dateRange(new Date(start_date), new Date(end_date));
+    for (let i = 0; i < range.length; i++) {
+        if (!isWeekend(new Date(range[i]))) {
+            _days++
+        }
+    }
+    console.log(_days)
 
     LogsModel.find({}, (err, docs) => {
         if (err) {
@@ -495,118 +517,130 @@ const getPeriodLogs = (req, res, mdl) => {
         let individualLogs = groupIn(docs)
         result.groups = [];
         for (let i in individualLogs) {
+            let my_days = _days;
             let t = {};
             t["p/No"] = i;
-            t["Name"] = individualLogs[i][0].Name;
-            t["Id"] = individualLogs[i][0].Id;
-            t["_id"] = individualLogs[i][0]._id;
-            t.items = [];
-            t["Variance"]=0;
-            let temp = groupIn(individualLogs[i], "userSn", "Date")
 
-            // temp_date[temp[0].Date] = {};
-            let len = 0;
+            if (individualLogs[i][0].Name&&individualLogs[i][0].Name!=="ADMIN1") {
+                t["Name"] = individualLogs[i][0].Name;
+                console.log(t["Name"])
+                t["Id"] = individualLogs[i][0].Id;
+                t["_id"] = individualLogs[i][0]._id;
+                t.items = [];
+                t["Variance"] = 0;
+                // t["Variance"] = "";
+                let temp = groupIn(individualLogs[i], "userSn", "Date")
 
-            for (let j in temp) {
-                len++;
-                if (!table_head.hasOwnProperty(j)) {
-                    table_head[j] = "String";
-                }
-                if (!isWeekend(new Date(j))) {
-                    let temp_date = {};
-                    temp_date["Date"] = j;
-                    let orderedLogs = temp[j].sort((a, b) => {
-                        return new Date(a.Time) > new Date(b.Time);
-                    })
+                // temp_date[temp[0].Date] = {};
+                let len = 0;
 
-                    temp_date["startTime"] = orderedLogs[0].Time;
-                    temp_date["endTime"] = orderedLogs[orderedLogs.length - 1].Time;
-                    t.items.push(temp_date);
-
-
-                    let timePairsObj = [];
-                    let time_pairs = []
-                    let count = 0;
-
-                    for (let k = 0; k < orderedLogs.length; k++) {
-                        if (count !== 1) {
-                            timePairsObj.push(time_pairs)
-                            count = 0;
+                for (let j in temp) {
+                    if (!isWeekend(new Date(j))) {
+                        len++;
+                        if (!table_head.hasOwnProperty(j)) {
+                            table_head[j] = "String";
                         }
-                        time_pairs.push(orderedLogs[k].Time)
-                        count++;
-                    }
+                        let temp_date = {};
+                        temp_date["Date"] = j;
+                        let orderedLogs = temp[j].sort((a, b) => {
+                            return new Date(a.Time) > new Date(b.Time);
+                        })
 
-                    let b_t_l = [[setDateTime(new Date(j), "08:00:00 AM"), setDateTime(new Date(j), "12:00:00 AM")], [setDateTime(new Date(j), "01:00:00 AM"), setDateTime(new Date(j), "04:00:00 AM")]],
-                        diff = 0;
-
-                    for (let l = 0; l < b_t_l.length; l++) {
-                        let lower_limit = b_t_l[l][0], lower_found = false, upper_limit = b_t_l[l][1];
-
-                        if (timePairsObj.length) {
-                            for (let k = 0; k < timePairsObj.length; k++) {
-                                let last_time, first_time, deficit;
-                                if (timePairsObj[k].length < 2) {
-                                    timePairsObj[k].push(timePairsObj[k][0]);
-                                }
-                                last_time = setDateTime(new Date(j), timePairsObj[k][1]);
-                                first_time = setDateTime(new Date(j), timePairsObj[k][0]);
+                        temp_date["startTime"] = orderedLogs[0].Time;
+                        temp_date["endTime"] = orderedLogs[orderedLogs.length - 1].Time;
+                        if (temp_date["endTime"]===temp_date["startTime"]){
+                            temp_date["endTime"]=""
+                        }
+                        t.items.push(temp_date);
 
 
-                                if (!lower_found) {
-                                    if (new Date(last_time) > new Date(lower_limit)) {
-                                        lower_found = true;
-                                        if (new Date(first_time) >= new Date(lower_limit)) {
-                                            deficit = (new Date(first_time) - new Date(lower_limit));
-                                        }
+                        let timePairsObj = [];
+                        let time_pairs = []
+                        let count = 0;
+
+                        for (let k = 0; k < orderedLogs.length; k++) {
+                            if (count !== 1) {
+                                timePairsObj.push(time_pairs)
+                                time_pairs = []
+                                count = 0;
+                            }
+                            time_pairs.push(orderedLogs[k].Time)
+
+                            count++;
+                        }
+
+                        let b_t_l = [[setDateTime(new Date(j), "08:00:00 AM"), setDateTime(new Date(j), "12:00:00 PM")], [setDateTime(new Date(j), "01:00:00 PM"), setDateTime(new Date(j), "04:00:00 PM")]],
+                            diff = 0;
+
+
+                        for (let l = 0; l < b_t_l.length; l++) {
+                            let lower_limit = b_t_l[l][0], lower_found = false, upper_limit = b_t_l[l][1];
+
+                            if (timePairsObj.length) {
+                                for (let k = 0; k < timePairsObj.length; k++) {
+                                    let last_time, first_time, deficit=0;
+                                    if (timePairsObj[k].length < 2) {
+                                        timePairsObj[k].push(timePairsObj[k][0]);
+                                        deficit=0;
+                                    }else {
+                                        last_time = setDateTime(new Date(j), timePairsObj[k][1]);
+                                        first_time = setDateTime(new Date(j), timePairsObj[k][0]);
+                                        console.log(timePairsObj[k])
+                                            if (!lower_found) {
+                                                if (new Date(last_time) >= new Date(lower_limit)&&new Date(last_time) <= new Date(upper_limit)) {
+                                                    lower_found = true;
+                                                    if (new Date(first_time) >= new Date(lower_limit)) {
+                                                        deficit = (new Date(first_time) - new Date(lower_limit)) / 1000;
+                                                    }else{
+                                                        deficit=0
+                                                    }
+
+                                                }else{
+                                                    deficit=0
+                                                }
+                                            } else {
+                                                if (new Date(last_time) <= new Date(upper_limit)&&new Date(first_time) >= new Date(lower_limit)) {
+                                                    deficit = (new Date(last_time) - new Date(first_time)) / 1000;
+                                                }
+                                                else{
+                                                    deficit=0;
+                                                }
+                                            }
+
                                     }
-
-                                    if (deficit > 0) {
+                                    console.log(lower_found)
+                                    console.log(secondsToHms(deficit))
+                                    if (deficit > 0&&deficit<(8*24*60)) {
                                         diff += deficit;
                                     }
-                                } else {
-                                    if (new Date(last_time) < new Date(upper_limit)) {
-                                        deficit = (new Date(last_time) - new Date(first_time));
 
-                                        if (deficit > 0) {
-                                            diff += deficit;
-                                        }
-                                    }
                                 }
+                            } else {
 
                             }
-                        } else {
-                            diff = 8 * 60 * 1000;
                         }
+                        t["Variance"] += ((diff));
 
-                        /*if ((setDateTime(new Date(j), timePairsObj[0][0])-b_t)>0){
-                                diff = setDateTime(new Date(j), timePairsObj[0][1]||timePairsObj[0][0])-b_t;
-                            console.log(setDateTime(new Date(j), timePairsObj[0][1]||timePairsObj[0][0]),b_t)
-                            }
-
-                        if (timePairsObj.length) {
-                            for (let k = 1; k < timePairsObj.length; k++) {
-                                let diff1 = timePairsObj[i] ? setDateTime(new Date(j), timePairsObj[k][1]||timePairsObj[k][0]) - setDateTime(t_d_o, timePairsObj[k][0]) : 0;
-                                diff += diff1
-                                // if ((setDateTime(t_d_o, timePairsObj[i][0])-b_t)>0){
-                                //
-                                // }
-                            }
-                        }*/
-                        console.log(diff)
+                    } else {
+                        console.log("weekend here")
+                        console.log(my_days)
+                        my_days -= 1;
+                        console.log(my_days - 1)
                     }
-                    t["Variance"] += ((diff / 1000));
-
                 }
-            }
-            if (!_days<len){
-                let _d = (_days-len)*8*60*1000;
-                t["Variance"]+=_d;
 
-            }
-            t["Variance"] = secondsToHms(t["Variance"])
+                console.log(my_days)
+                console.log(len)
 
-            result.groups.push(t)
+                if (my_days >= len) {
+                    let _d = (my_days - len) * 8 * 60*60;
+                    console.log(t["Variance"])
+                    t["Variance"] += _d;
+                }
+                t["Variance"] = (secondsToHms(t["Variance"]))
+
+                result.groups.push(t)
+            }
 
         }
         result.table_head = table_head;
@@ -881,36 +915,35 @@ function secondsToHms(d) {
 }
 
 
-function getMonday(date){
+function getMonday(date) {
     var d = new Date(date);
     d.setDate(d.getDate() + (((1 + 7 - d.getDay()) % 7) || 7));
 }
+
 function closest_tuesday_or_friday() {
-  var today = new Date(), tuesday, friday, day, closest;
+    var today = new Date(), tuesday, friday, day, closest;
 
-  if(today.getDay() == 2 || today.getDay() == 5){
-    if(today.getHours() < 22){
-      return today.getFullYear() + "/" + (today.getMonth() + 1) + "/" + today.getDate();
+    if (today.getDay() == 2 || today.getDay() == 5) {
+        if (today.getHours() < 22) {
+            return today.getFullYear() + "/" + (today.getMonth() + 1) + "/" + today.getDate();
+        }
+    } else {
+        day = today.getDay();
+        tuesday = today.getDate() - day + (day === 0 ? -6 : 2);
+        friday = today.getDate() - day + (day === 0 ? -6 : 5);
     }
-  }else{
-    day = today.getDay();
-    tuesday = today.getDate() - day + (day === 0 ? -6 : 2);
-    friday = today.getDate() - day + (day === 0 ? -6 : 5);
-  }
 
-  if(tuesday < friday){
-    closest = new Date(today.setDate(tuesday));
-  }else{
-    closest = new Date(today.setDate(friday));
-  }
-  return closest.getFullYear() + "/" + (closest.getMonth() + 1) + "/" + closest.getDate();
+    if (tuesday < friday) {
+        closest = new Date(today.setDate(tuesday));
+    } else {
+        closest = new Date(today.setDate(friday));
+    }
+    return closest.getFullYear() + "/" + (closest.getMonth() + 1) + "/" + closest.getDate();
 }
 
-function isWeekend(myDate)
-{
+function isWeekend(myDate) {
     return !(myDate.getDay() % 6);
 }
-console.log(closest_tuesday_or_friday());
 
 module.exports = {
     TableMaster,
