@@ -1,4 +1,4 @@
-const ZKLib = require('../../zklib')
+const ZKLib = require('../../zklib');
 
 const test = async (req, res) => {
 
@@ -6,7 +6,7 @@ const test = async (req, res) => {
     let zkInstance = new ZKLib('192.168.0.100', 4370, 10000, 4000);
     try {
         // Create socket to machine
-        await zkInstance.createSocket()
+        await zkInstance.createSocket();
 
 
         // Get general info like logCapacity, user counts, logs count
@@ -16,11 +16,11 @@ const test = async (req, res) => {
 
     }
 
-    const users = await zkInstance.getUsers()
+    const users = await zkInstance.getUsers();
 
     const attendances = await zkInstance.getAttendances('192.168.0.100', (percent, total) => {
         // this callbacks take params is the percent of data downloaded and total data need to download
-    })
+    });
 
     // console.log('check attendances',attendances )
 
@@ -38,7 +38,7 @@ const test = async (req, res) => {
     //     console.log(data)
     // })
 
-}
+};
 
 // test()
 
@@ -66,7 +66,6 @@ ad.authenticate(username, password, function(err, auth) {
 });*/
 
 
-
 const {
     TableMaster,
     findUser,
@@ -75,13 +74,20 @@ const {
     RolesModel,
     StatusModel,
     LogsModel,
-    getPeriodLogs
+    getPeriodLogs,
+    SettingsModel
 } = require("../models/models");
 
 
 const FetchController = (app) => {
     app.get("/api/logs", (req, res) => {
-        test(req, res).then((logsObject) => {
+        var fs = require('fs'),
+            path = require('path'),
+            filePath = path.join(__dirname, 'my_data.json');
+
+        fs.readFile(filePath, function (err, data) {
+            if (!err) {
+                /*test(req, res).then((logsObject) => {
             if (logsObject.info.length) {
                 let temp_users = {}
                 for (let i = 0; i < logsObject.users.data.length; i++) {
@@ -89,11 +95,12 @@ const FetchController = (app) => {
                 }
                 for (let i = 0; i < logsObject.info.length; i++) {
                     delete logsObject.info[i].ip;
-                    let temp = new Date(logsObject.info[i].recordTime), t = temp.toLocaleTimeString(), d = temp.toLocaleDateString();
-                    logsObject.info[i].Id = logsObject.info[i].deviceUserId+d+t
+                    let temp = new Date(logsObject.info[i].recordTime), t = temp.toLocaleTimeString(),
+                        d = temp.toLocaleDateString();
+                    logsObject.info[i].Id = logsObject.info[i].deviceUserId + d + t
                     logsObject.info[i].Name = temp_users[logsObject.info[i].deviceUserId]
-                    logsObject.info[i].Date = d
-                    logsObject.info[i].Time = t
+                    logsObject.info[i].Date = d;
+                    logsObject.info[i].Time = t;
                     delete logsObject.info[i].recordTime;
                 }
                 req.body = logsObject.info;
@@ -104,7 +111,7 @@ const FetchController = (app) => {
                         temp[docs[i].Id] = true;
                     }
                     for (let i = 0; i < req.body.length; i++) {
-                        if (!temp[req.body[i].Id]){
+                        if (!temp[req.body[i].Id]) {
                             to_add.push(req.body[i])
                         }
                     }
@@ -114,7 +121,60 @@ const FetchController = (app) => {
 
 
             }
-        })
+        })*/
+                let logsObject = JSON.parse(data.toString());
+                if (logsObject.info.length) {
+                    let rcd = {};
+                    let users = [];
+                    for (let i = 0; i < logsObject.info.length; i++) {
+                        if (!rcd.hasOwnProperty(logsObject.info[i].deviceUserId)) {
+                            rcd[logsObject.info[i].deviceUserId] = "";
+                            let temp = {name: `someone${i}`};
+                            temp["userId"] = logsObject.info[i].deviceUserId;
+                            users.push(temp)
+                        }
+                    }
+                    logsObject.users = {
+                        data: users
+                    };
+                    let temp_users = {};
+                    for (let i = 0; i < logsObject.users.data.length; i++) {
+                        temp_users[logsObject.users.data[i].userId] = logsObject.users.data[i].name
+                    }
+                    for (let i = 0; i < logsObject.info.length; i++) {
+                        delete logsObject.info[i].ip;
+                        let temp = new Date(logsObject.info[i].recordTime), t = temp.toLocaleTimeString(),
+                            d = temp.toLocaleDateString();
+                        logsObject.info[i].Id = logsObject.info[i].deviceUserId + d + t;
+                        logsObject.info[i].Name = temp_users[logsObject.info[i].deviceUserId];
+                        logsObject.info[i].Date = d;
+                        logsObject.info[i].Time = t;
+                        delete logsObject.info[i].recordTime;
+                    }
+                    req.body = logsObject.info;
+                    LogsModel.find({}, (err, docs) => {
+                        let to_add = [];
+                        let temp = {};
+                        for (let i = 0; i < docs.length; i++) {
+                            temp[docs[i].Id] = true;
+                        }
+                        for (let i = 0; i < req.body.length; i++) {
+                            if (!temp[req.body[i].Id]) {
+                                to_add.push(req.body[i])
+                            }
+                        }
+                        req.body = to_add;
+                        new TableMaster("logs", LogsModel).add(req, res);
+                    })
+
+
+                }
+
+            } else {
+                console.log(err);
+            }
+        });
+
     });
     app.post("/api/users/verify", (req, res) => {
         findUser(req, res);
@@ -172,6 +232,27 @@ const FetchController = (app) => {
 
     app.post("/api/biometriclogs/deleteAll", (req, res) => {
         new TableMaster("biometriclogs", LogsModel).deleteAll(req, res);
+    });
+
+
+    app.get("/api/settings", (req, res) => {
+        new TableMaster("settings", SettingsModel).retrieve(req, res);
+    });
+
+    app.post("/api/settings/", (req, res) => {
+        new TableMaster("settings", SettingsModel).add(req, res);
+    });
+
+    app.post("/api/settings/delete", (req, res) => {
+        new TableMaster("settings", SettingsModel).delete(req, res);
+    });
+
+    app.post("/api/settings/update", (req, res) => {
+        new TableMaster("settings", SettingsModel).update(req, res);
+    });
+
+    app.post("/api/settings/deleteAll", (req, res) => {
+        new TableMaster("settings", SettingsModel).deleteAll(req, res);
     });
 
 
