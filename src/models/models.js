@@ -523,186 +523,190 @@ const getPeriodLogs = (req, res, mdl) => {
         });
 
 
-        let result = {};
+        SettingsModel.find({}, (err, settings) => {
 
-        const sortObject = o => Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {})
-        let table_head = {};
+            let result = {};
 
-        let individualLogs = groupIn(docs)
-        result.groups = [];
-        for (let i in individualLogs) {
-            let my_days = _days;
-            let t = {};
-            t["p/No"] = i;
+            const sortObject = o => Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {})
+            let table_head = {};
 
-            if (individualLogs[i][0].Name && individualLogs[i][0].Name !== "ADMIN1") {
-                t["Name"] = individualLogs[i][0].Name;
-                // console.log(t["Name"])
-                t["Id"] = individualLogs[i][0].Id;
-                t["_id"] = individualLogs[i][0]._id;
-                t.items = [];
-                t["Variance"] = 0;
-                // t["Variance"] = "";
-                let temp = groupIn(individualLogs[i], "userSn", "Date")
+            let individualLogs = groupIn(docs)
+            result.groups = [];
+            for (let i in individualLogs) {
+                let my_days = _days;
+                let t = {};
+                t["p/No"] = i;
 
-                // temp_date[temp[0].Date] = {};
-                let len = 0;
+                if (individualLogs[i][0].Name && individualLogs[i][0].Name !== "ADMIN1") {
+                    t["Name"] = individualLogs[i][0].Name;
+                    // console.log(t["Name"])
+                    t["Id"] = individualLogs[i][0].Id;
+                    t["_id"] = individualLogs[i][0]._id;
+                    t.items = [];
+                    t["Variance"] = 0;
+                    // t["Variance"] = "";
+                    let temp = groupIn(individualLogs[i], "userSn", "Date")
 
-                for (let j in temp) {
-                    if (!isWeekend(new Date(j))) {
-                        // console.log(j);
-                        len++;
-                        if (!table_head.hasOwnProperty(j)) {
-                            table_head[j] = "String";
-                        }
-                        let temp_date = {};
-                        temp_date["Date"] = j;
-                        let orderedLogs = temp[j].sort((a, b) => {
-                            return new Date(a.Time) > new Date(b.Time);
-                        });
+                    // temp_date[temp[0].Date] = {};
+                    let len = 0;
 
-                        temp_date["startTime"] = orderedLogs[0].Time;
-                        temp_date["endTime"] = orderedLogs[orderedLogs.length - 1].Time;
-                        if (temp_date["endTime"] === temp_date["startTime"]) {
-                            temp_date["endTime"] = ""
-                        }
-                        t.items.push(temp_date);
-
-
-                        let timePairsObj = [];
-                        let time_pairs = []
-                        let count = 0;
-
-                        timePairsObj = orderedLogs.reduce(function (result, value, index, array) {
-                            if (index % 2 === 0) {
-                                let _arr = array.slice(index, index + 2);
-                                let temp = [_arr[0].Time, _arr[1]?_arr[1].Time:_arr[0].Time];
-                                result.push(temp);
+                    for (let j in temp) {
+                        if (!isWeekend(new Date(j))) {
+                            // console.log(j);
+                            len++;
+                            if (!table_head.hasOwnProperty(j)) {
+                                table_head[j] = "String";
                             }
-                            return result;
-                        }, []);
-                        /*for (let k = 0; k < orderedLogs.length; k++) {
-                            console.log(orderedLogs[k].Time)
-                            if (count !== 1) {
-                                timePairsObj.push(time_pairs)
-                                time_pairs = [];
-                                count = 0;
+                            let temp_date = {};
+                            temp_date["Date"] = j;
+                            let orderedLogs = temp[j].sort((a, b) => {
+                                return new Date(a.Time) > new Date(b.Time);
+                            });
+
+                            temp_date["startTime"] = orderedLogs[0].Time;
+                            temp_date["endTime"] = orderedLogs[orderedLogs.length - 1].Time;
+                            if (temp_date["endTime"] === temp_date["startTime"]) {
+                                temp_date["endTime"] = ""
                             }
-                            time_pairs.push(orderedLogs[k].Time)
+                            t.items.push(temp_date);
 
-                            count++;
-                        }*/
 
-                        let b_t_l = [["08:00:00 AM", "01:00:00 PM"], ["02:00:00 PM", "05:00:00 PM"]],
-                            diff = 0;
+                            let timePairsObj = [];
+                            let time_pairs = []
+                            let count = 0;
 
-                        // console.log(timePairsObj)
+                            timePairsObj = orderedLogs.reduce(function (result, value, index, array) {
+                                if (index % 2 === 0) {
+                                    let _arr = array.slice(index, index + 2);
+                                    let temp = [_arr[0].Time, _arr[1] ? _arr[1].Time : _arr[0].Time];
+                                    result.push(temp);
+                                }
+                                return result;
+                            }, []);
+                            /*for (let k = 0; k < orderedLogs.length; k++) {
+                                console.log(orderedLogs[k].Time)
+                                if (count !== 1) {
+                                    timePairsObj.push(time_pairs)
+                                    time_pairs = [];
+                                    count = 0;
+                                }
+                                time_pairs.push(orderedLogs[k].Time)
 
-                        /*for (let l = 0; l < b_t_l.length; l++) {
-                            let lower_limit = setDateTime(new Date(j), b_t_l[l][0]),
-                                lower_found = false,
-                                upper_limit = setDateTime(new Date(j), b_t_l[l][1]);
+                                count++;
+                            }*/
 
-                            console.log(lower_limit, upper_limit)
-                            let previous_time = {start:"", end: ""};
-                            if (timePairsObj.length) {
-                                for (let k = 0; k < timePairsObj.length; k++) {
-                                    let last_time, first_time, deficit=0;
-                                    if (timePairsObj[k].length < 2) {
-                                        timePairsObj[k].push(timePairsObj[k][0]);
-                                        deficit=0;
-                                    }else {
-                                        last_time = setDateTime(new Date(j), timePairsObj[k][1]);
-                                        first_time = setDateTime(new Date(j), timePairsObj[k][0]);
-                                        console.log(timePairsObj[k])
-                                        console.log("beyond", (new Date(first_time) >= new Date(upper_limit)), new Date(first_time) , new Date(upper_limit))
-                                        if (!(new Date(first_time) >= new Date(upper_limit) && new Date(last_time) >= new Date(upper_limit))) {
-                                            if (!lower_found) {
-                                                if (new Date(last_time) >= new Date(lower_limit) && new Date(last_time) <= new Date(upper_limit)) {
-                                                    lower_found = true;
-                                                    previous_time.start = lower_limit;
-                                                    previous_time.end = last_time;
-                                                    if (new Date(first_time) >= new Date(lower_limit)) {
-                                                        deficit = (new Date(first_time) - new Date(lower_limit)) / 1000;
+
+                            let b_t_l = [["08:00:00 AM", "01:00:00 PM"], ["02:00:00 PM", "05:00:00 PM"]],
+                                diff = 0;
+
+                            // console.log(timePairsObj)
+
+                            /*for (let l = 0; l < b_t_l.length; l++) {
+                                let lower_limit = setDateTime(new Date(j), b_t_l[l][0]),
+                                    lower_found = false,
+                                    upper_limit = setDateTime(new Date(j), b_t_l[l][1]);
+
+                                console.log(lower_limit, upper_limit)
+                                let previous_time = {start:"", end: ""};
+                                if (timePairsObj.length) {
+                                    for (let k = 0; k < timePairsObj.length; k++) {
+                                        let last_time, first_time, deficit=0;
+                                        if (timePairsObj[k].length < 2) {
+                                            timePairsObj[k].push(timePairsObj[k][0]);
+                                            deficit=0;
+                                        }else {
+                                            last_time = setDateTime(new Date(j), timePairsObj[k][1]);
+                                            first_time = setDateTime(new Date(j), timePairsObj[k][0]);
+                                            console.log(timePairsObj[k])
+                                            console.log("beyond", (new Date(first_time) >= new Date(upper_limit)), new Date(first_time) , new Date(upper_limit))
+                                            if (!(new Date(first_time) >= new Date(upper_limit) && new Date(last_time) >= new Date(upper_limit))) {
+                                                if (!lower_found) {
+                                                    if (new Date(last_time) >= new Date(lower_limit) && new Date(last_time) <= new Date(upper_limit)) {
+                                                        lower_found = true;
+                                                        previous_time.start = lower_limit;
+                                                        previous_time.end = last_time;
+                                                        if (new Date(first_time) >= new Date(lower_limit)) {
+                                                            deficit = (new Date(first_time) - new Date(lower_limit)) / 1000;
+                                                        } else {
+                                                            deficit = 0
+                                                        }
+
                                                     } else {
                                                         deficit = 0
                                                     }
-
                                                 } else {
-                                                    deficit = 0
-                                                }
-                                            } else {
-                                                if (new Date(first_time) <= new Date(upper_limit) && new Date(first_time) >= previous_time.end) {
-                                                    deficit = (new Date(first_time) - new Date(previous_time.end)) / 1000;
-                                                } else {
-                                                    if (new Date(first_time) > new Date(upper_limit)) {
-                                                        if (new Date(previous_time.end) <= new Date(upper_limit)) {
-                                                            deficit = (new Date(upper_limit) - new Date(previous_time.end)) / 1000;
+                                                    if (new Date(first_time) <= new Date(upper_limit) && new Date(first_time) >= previous_time.end) {
+                                                        deficit = (new Date(first_time) - new Date(previous_time.end)) / 1000;
+                                                    } else {
+                                                        if (new Date(first_time) > new Date(upper_limit)) {
+                                                            if (new Date(previous_time.end) <= new Date(upper_limit)) {
+                                                                deficit = (new Date(upper_limit) - new Date(previous_time.end)) / 1000;
+                                                            }
                                                         }
                                                     }
+                                                    /!*if (new Date(last_time) <= new Date(upper_limit)&&new Date(first_time) >= new Date(lower_limit)) {
+                                                        deficit = (new Date(last_time) - new Date(first_time)) / 1000;
+                                                    }
+                                                    else{
+                                                        deficit=0;
+                                                    }*!/
                                                 }
-                                                /!*if (new Date(last_time) <= new Date(upper_limit)&&new Date(first_time) >= new Date(lower_limit)) {
-                                                    deficit = (new Date(last_time) - new Date(first_time)) / 1000;
-                                                }
-                                                else{
-                                                    deficit=0;
-                                                }*!/
-                                            }
 
-                                        }else{
-                                            break;
+                                            }else{
+                                                break;
+                                            }
+                                            console.log(lower_found)
+                                            console.log(secondsToDhms(deficit))
+                                            if (deficit > 0 && deficit < (8 * 24 * 60)) {
+                                                diff += deficit;
+                                            }
                                         }
-                                        console.log(lower_found)
-                                        console.log(secondsToDhms(deficit))
-                                        if (deficit > 0 && deficit < (8 * 24 * 60)) {
-                                            diff += deficit;
-                                        }
+
                                     }
+                                } else {
 
                                 }
-                            } else {
+                            }*/
+                            // t["Variance"] += ((diff));
+                            t["Variance"] += computeValidHours(b_t_l, timePairsObj);
 
-                            }
-                        }*/
-                        // t["Variance"] += ((diff));
-                        t["Variance"] += computeValidHours(b_t_l, timePairsObj);
-
-                    } else {
-                        // console.log("weekend here")
-                        // console.log(my_days)
-                        my_days -= 1;
-                        // console.log(my_days - 1)
+                        } else {
+                            // console.log("weekend here")
+                            // console.log(my_days)
+                            my_days -= 1;
+                            // console.log(my_days - 1)
+                        }
                     }
+
+                    // console.log(my_days)
+                    // console.log(len)
+
+                    if (my_days >= len) {
+                        let _d = (my_days - len) * 8 * 60 * 60;
+                        // console.log(t["Variance"])
+                        t["Variance"] += _d;
+                    }
+                    if (t["Variance"] === 0) {
+                        t["Variance"] = "Excellent Attendance"
+                    } else {
+                        t["Variance"] = (secondsToDhms(t["Variance"]));
+                    }
+
+                    result.groups.push(t)
                 }
 
-                // console.log(my_days)
-                // console.log(len)
-
-                if (my_days >= len) {
-                    let _d = (my_days - len) * 8 * 60 * 60;
-                    // console.log(t["Variance"])
-                    t["Variance"] += _d;
-                }
-                if (t["Variance"]===0){
-                    t["Variance"] = "Excellent Attendance"
-                }else {
-                    t["Variance"] = (secondsToDhms(t["Variance"]));
-                }
-
-                result.groups.push(t)
             }
-
-        }
-        result.table_head = table_head;
-        result.LogsLength = docs.length;
-        result.Logs = [...docs];
-        let len = docs.length;
-        let counter = 0;
-        res.send(
-            {
-                info: result
-            }
-        );
+            result.table_head = table_head;
+            result.LogsLength = docs.length;
+            result.Logs = [...docs];
+            let len = docs.length;
+            let counter = 0;
+            res.send(
+                {
+                    info: result
+                }
+            );
+        });
 
 
     });
@@ -970,17 +974,17 @@ function setDateTime(date, time) {
 }
 
 function secondsToDhms(seconds) {
-seconds = Number(seconds);
-var d = Math.floor(seconds / (3600*24));
-var h = Math.floor(seconds % (3600*24) / 3600);
-var m = Math.floor(seconds % 3600 / 60);
-var s = Math.floor(seconds % 60);
+    seconds = Number(seconds);
+    var d = Math.floor(seconds / (3600 * 24));
+    var h = Math.floor(seconds % (3600 * 24) / 3600);
+    var m = Math.floor(seconds % 3600 / 60);
+    var s = Math.floor(seconds % 60);
 
-var dDisplay = d > 0 ? d + (d == 1 ? " day, " : " days, ") : "";
-var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
-return dDisplay + hDisplay + mDisplay + sDisplay;
+    var dDisplay = d > 0 ? d + (d == 1 ? " day, " : " days, ") : "";
+    var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
+    var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
+    var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+    return dDisplay + hDisplay + mDisplay + sDisplay;
 }
 
 
