@@ -19,6 +19,7 @@
     "mongoose-dynamic-schemas": "^1.2.6",
     "morgan": "~1.9.1",
     "node-zklib": "^1.0.0",
+    "nodemon": "^2.0.20",
     "uuid": "^8.3.2",
     "zklib": "^0.2.11"
   }

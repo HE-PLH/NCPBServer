@@ -1,71 +1,5 @@
 const ZKLib = require('../../zklib');
 
-const test = async (req, res) => {
-
-
-    let zkInstance = new ZKLib('192.168.0.100', 4370, 10000, 4000);
-    try {
-        // Create socket to machine
-        await zkInstance.createSocket();
-
-
-        // Get general info like logCapacity, user counts, logs count
-        // It's really useful to check the status of device
-        console.log(await zkInstance.getInfo())
-    } catch (e) {
-
-    }
-
-    const users = await zkInstance.getUsers();
-
-    const attendances = await zkInstance.getAttendances('192.168.0.100', (percent, total) => {
-        // this callbacks take params is the percent of data downloaded and total data need to download
-    });
-
-    // console.log('check attendances',attendances )
-
-    // let temp_attendance = attendances;
-
-    return ({
-        info: attendances.data,
-        users
-    })
-
-    // console.log('check users', users)
-    // await zkInstance.disconnect()
-    // zkInstance.getRealTimeLogs((data)=>{
-    //     // do something when some checkin
-    //     console.log(data)
-    // })
-
-};
-
-// test()
-
-/*// Initialize
-var ActiveDirectory = require('activedirectory');
-var config = {
-    url: 'ldap://dc.domain.com',
-    baseDN: 'dc=domain,dc=com'
-};
-var ad = new ActiveDirectory(config);
-var username = 'john.smith@domain.com';
-var password = 'password';
-// Authenticate
-ad.authenticate(username, password, function(err, auth) {
-    if (err) {
-        console.log('ERROR: '+JSON.stringify(err));
-        return;
-    }
-    if (auth) {
-        console.log('Authenticated!');
-    }
-    else {
-        console.log('Authentication failed!');
-    }
-});*/
-
-
 const {
     TableMaster,
     findUser,
@@ -75,105 +9,165 @@ const {
     StatusModel,
     LogsModel,
     getPeriodLogs,
-    SettingsModel
+    SettingsModel,
+    getIndividualPeriodLogs,
+    getLateInAndEarlyOutPeriodLogs,
+    onSchedule
 } = require("../models/models");
+
+const test = async (IP_OBJ, req, res) => {
+    try {
+        let IP = '';
+        IP_OBJ.map(({Name, items}) => {
+            if (Name === "Device IP") {
+                IP = items[0].Name
+            }
+        })
+
+        let zkInstance = new ZKLib(IP, 4370, 10000, 4000);
+
+        await zkInstance.createSocket();
+        await zkInstance.getInfo()
+
+
+        const users = await zkInstance.getUsers();
+
+
+        const attendances = await zkInstance.getAttendances(IP, (percent, total) => {
+            // this callbacks take params is the percent of data downloaded and total data need to download
+        });
+
+        // console.log('check attendances',attendances )
+
+        // let temp_attendance = attendances;
+
+        return ({
+            info: attendances.data,
+            users
+        })
+    }catch (e){
+        console.log(e)
+        return ({
+            info: [],
+            users:[]
+        })
+    }
+    // console.log('check users', users)
+    // await zkInstance.disconnect()
+    // zkInstance.getRealTimeLogs((data)=>{
+    //     // do something when some checkin
+    //     console.log(data)
+    // })
+
+};
+
+
 
 
 const FetchController = (app) => {
-    app.get("/api/logs", (req, res) => {
-        var fs = require('fs'),
-            path = require('path'),
-            filePath = path.join(__dirname, 'my_data.json');
 
-        fs.readFile(filePath, function (err, data) {
-            if (!err) {
-                /*test(req, res).then((logsObject) => {
-            if (logsObject.info.length) {
-                let temp_users = {}
-                for (let i = 0; i < logsObject.users.data.length; i++) {
-                    temp_users[logsObject.users.data[i].userId] = logsObject.users.data[i].name
+    setInterval(function (e){
+        console.log("syncing")
+        SettingsModel.find({}, (err, settings) => {
+            let IP;
+            return settings;
+        }).then((IP_OBJ) => {
+            let req = {body: {}}, res =  {
+                send: function (e){
+                    console.log("synced successfully");
                 }
-                for (let i = 0; i < logsObject.info.length; i++) {
-                    delete logsObject.info[i].ip;
-                    let temp = new Date(logsObject.info[i].recordTime), t = temp.toLocaleTimeString(),
-                        d = temp.toLocaleDateString();
-                    logsObject.info[i].Id = logsObject.info[i].deviceUserId + d + t
-                    logsObject.info[i].Name = temp_users[logsObject.info[i].deviceUserId]
-                    logsObject.info[i].Date = d;
-                    logsObject.info[i].Time = t;
-                    delete logsObject.info[i].recordTime;
-                }
-                req.body = logsObject.info;
-                LogsModel.find({}, (err, docs) => {
-                    let to_add = []
-                    let temp = {}
-                    for (let i = 0; i < docs.length; i++) {
-                        temp[docs[i].Id] = true;
-                    }
-                    for (let i = 0; i < req.body.length; i++) {
-                        if (!temp[req.body[i].Id]) {
-                            to_add.push(req.body[i])
+            };
+            try {
+                test(IP_OBJ, req, res).then((logsObject) => {
+                    if (logsObject.info.length) {
+                        let temp_users = {}
+                        for (let i = 0; i < logsObject.users.data.length; i++) {
+                            temp_users[logsObject.users.data[i].userId] = logsObject.users.data[i].name
                         }
-                    }
-                    req.body = to_add
-                    new TableMaster("logs", LogsModel).add(req, res);
-                })
-
-
-            }
-        })*/
-                let logsObject = JSON.parse(data.toString());
-                if (logsObject.info.length) {
-                    let rcd = {};
-                    let users = [];
-                    for (let i = 0; i < logsObject.info.length; i++) {
-                        if (!rcd.hasOwnProperty(logsObject.info[i].deviceUserId)) {
-                            rcd[logsObject.info[i].deviceUserId] = "";
-                            let temp = {name: `someone${i}`};
-                            temp["userId"] = logsObject.info[i].deviceUserId;
-                            users.push(temp)
+                        for (let i = 0; i < logsObject.info.length; i++) {
+                            delete logsObject.info[i].ip;
+                            let temp = new Date(logsObject.info[i].recordTime), t = temp.toLocaleTimeString(),
+                                d = temp.toLocaleDateString();
+                            logsObject.info[i].Id = logsObject.info[i].deviceUserId + d + t
+                            logsObject.info[i].Name = temp_users[logsObject.info[i].deviceUserId]
+                            logsObject.info[i].Date = d;
+                            logsObject.info[i].Time = t;
+                            delete logsObject.info[i].recordTime;
                         }
-                    }
-                    logsObject.users = {
-                        data: users
-                    };
-                    let temp_users = {};
-                    for (let i = 0; i < logsObject.users.data.length; i++) {
-                        temp_users[logsObject.users.data[i].userId] = logsObject.users.data[i].name
-                    }
-                    for (let i = 0; i < logsObject.info.length; i++) {
-                        delete logsObject.info[i].ip;
-                        let temp = new Date(logsObject.info[i].recordTime), t = temp.toLocaleTimeString(),
-                            d = temp.toLocaleDateString();
-                        logsObject.info[i].Id = logsObject.info[i].deviceUserId + d + t;
-                        logsObject.info[i].Name = temp_users[logsObject.info[i].deviceUserId];
-                        logsObject.info[i].Date = d;
-                        logsObject.info[i].Time = t;
-                        delete logsObject.info[i].recordTime;
-                    }
-                    req.body = logsObject.info;
-                    LogsModel.find({}, (err, docs) => {
-                        let to_add = [];
-                        let temp = {};
-                        for (let i = 0; i < docs.length; i++) {
-                            temp[docs[i].Id] = true;
-                        }
-                        for (let i = 0; i < req.body.length; i++) {
-                            if (!temp[req.body[i].Id]) {
-                                to_add.push(req.body[i])
+                        req.body = logsObject.info;
+                        LogsModel.find({}, (err, docs) => {
+                            let to_add = []
+                            let temp = {}
+                            for (let i = 0; i < docs.length; i++) {
+                                temp[docs[i].Id] = true;
                             }
-                        }
-                        req.body = to_add;
-                        new TableMaster("logs", LogsModel).add(req, res);
-                    })
+                            for (let i = 0; i < req.body.length; i++) {
+                                if (!temp[req.body[i].Id]) {
+                                    to_add.push(req.body[i])
+                                }
+                            }
+                            req.body = to_add
+                            console.log(LogsModel)
+                            new TableMaster("logs", LogsModel).add(req, res);
+                        })
 
 
-                }
-
-            } else {
-                console.log(err);
+                    }
+                })
+            }catch (e) {
+                console.log(e)
             }
-        });
+        })
+    }, 2*1000*60*60)
+
+    app.get("/api/logs", (req, res) => {
+        SettingsModel.find({}, (err, settings) => {
+            let IP;
+            return settings;
+        }).then((IP_OBJ) => {
+            try {
+                test(IP_OBJ, req, res).then((logsObject) => {
+                    if (logsObject.info.length) {
+                        let temp_users = {}
+                        for (let i = 0; i < logsObject.users.data.length; i++) {
+                            temp_users[logsObject.users.data[i].userId] = logsObject.users.data[i].name
+                        }
+                        for (let i = 0; i < logsObject.info.length; i++) {
+                            delete logsObject.info[i].ip;
+                            let temp = new Date(logsObject.info[i].recordTime), t = temp.toLocaleTimeString(),
+                                d = temp.toLocaleDateString();
+                            logsObject.info[i].Id = logsObject.info[i].deviceUserId + d + t
+                            logsObject.info[i].Name = temp_users[logsObject.info[i].deviceUserId]
+                            logsObject.info[i].Date = d;
+                            logsObject.info[i].Time = t;
+                            delete logsObject.info[i].recordTime;
+                        }
+                        req.body = logsObject.info;
+                        LogsModel.find({}, (err, docs) => {
+                            let to_add = []
+                            let temp = {}
+                            for (let i = 0; i < docs.length; i++) {
+                                temp[docs[i].Id] = true;
+                            }
+                            for (let i = 0; i < req.body.length; i++) {
+                                if (!temp[req.body[i].Id]) {
+                                    to_add.push(req.body[i])
+                                }
+                            }
+                            req.body = to_add
+                            new TableMaster("logs", LogsModel).add(req, res);
+                        })
+
+
+                    }
+                })
+            }catch (e) {
+                res.send({
+                    info: e
+                })
+            }
+        })
+
 
     });
     app.post("/api/users/verify", (req, res) => {
@@ -276,6 +270,19 @@ const FetchController = (app) => {
     app.post("/api/periodicLogs/", (req, res) => {
         getPeriodLogs(req, res);
     });
+
+    app.post("/api/lieo/", (req, res) => {
+        getLateInAndEarlyOutPeriodLogs(req, res);
+    });
+
+    app.post("/api/individualPeriodLogs/", (req, res) => {
+        getIndividualPeriodLogs(req, res);
+    });
+
+    app.post("/api/onSchedule/", (req, res) => {
+        onSchedule(req, res);
+    });
+
 };
 
 module.exports = {

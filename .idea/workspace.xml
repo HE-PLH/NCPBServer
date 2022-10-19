@@ -1,8 +1,159 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="fbfa9c64-274b-4267-b19f-7840c877006b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/LateInEarlyOut/lateInEarlyOut.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/LateInEarlyOut/tb.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/OnSchedule/OnSchedule.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/OnSchedule/tb.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/public/App_print.css" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/public/App_print.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/MatchId-cmp.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/MatchId-cmp.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/SuppliesName-cmp.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/SuppliesName-cmp.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/User-cmp.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/User-cmp.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/conditions-cmp.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/conditions-cmp.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/invoiceId-cmp.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/invoiceId-cmp.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/message-type-cmp.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/message-type-cmp.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/odd-items-cmp.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/odd-items-cmp.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/projectId-cmp.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/projectId-cmp.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/roles-cmp.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/roles-cmp.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/siteId-cmp.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/siteId-cmp.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/status-cmp.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/status-cmp.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/suppliesId-cmp.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/components/contexts/suppliesId-cmp.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/components/upload-images-component.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/components/upload-images-component.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/layouts/dashboard/SidebarConfig.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/layouts/dashboard/SidebarConfig.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Bills/Bills.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Bills/Bills.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Biometric Reports/BiometricReports.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Biometric Reports/BiometricReports.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Biometric Reports/tb.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Biometric Reports/tb.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Biometric Reportserr/BiometricReports.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Biometric Reportserr/BiometricReports.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/CreditNoteGen.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/CreditNoteGen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Divisions/Divisions.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Divisions/Divisions.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/DivisionsView/DivisionsView.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/DivisionsView/DivisionsView.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/FinalJobCard.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/FinalJobCard.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/FinalProjectInvoice.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/FinalProjectInvoice.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/FinalSupplyCreditNote.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/FinalSupplyCreditNote.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/FinalSupplyDelivery.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/FinalSupplyDelivery.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/FinalSupplyInvoice.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/FinalSupplyInvoice.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/General Report/GeneralReport.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/General Report/GeneralReport.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Individual-Supplies-View/IndividialSuppliesView.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Individual-Supplies-View/IndividialSuppliesView.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/IndividualSupplies/IndividualSupplies.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/IndividualSupplies/IndividualSupplies.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/InvoicePayment/InvoicePayment.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/InvoicePayment/InvoicePayment.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/InvoiceTemplate.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/InvoiceTemplate.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/InvoicesView/InvoicesView.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/InvoicesView/InvoicesView.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Items/Items.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Items/Items.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Logs-View/LogsView.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Logs-View/LogsView.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Logs/Logs.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Logs/Logs.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/OtherExpenses/OtherExpenses.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/OtherExpenses/OtherExpenses.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/PettyCash.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/PettyCash.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/PettyCash/PettyCashExpenses.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/PettyCash/PettyCashExpenses.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Profile.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Profile.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectInvoiceTemplate.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectInvoiceTemplate.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectJobCard.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectJobCard.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectPayments/ProjectPayments.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectPayments/ProjectPayments.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectSites/ProjectSites.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectSites/ProjectSites.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectSupplies/ProjectSupplies.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectSupplies/ProjectSupplies.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectSuppliesView/ProjectSuppliesView.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectSuppliesView/ProjectSuppliesView.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Projects/Projects.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Projects/Projects.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectsInvoice/ProjectsInvoice.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectsInvoice/ProjectsInvoice.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectsWorks/ProjectWorks.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/ProjectsWorks/ProjectWorks.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Settings/Settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Settings/Settings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Stocks.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Stocks.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Stocks/Stocks.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Stocks/Stocks.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Supplies-View/Supplies.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Supplies-View/Supplies.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Supplies/Supplies.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Supplies/Supplies.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/SuppliesDelivery/SuppliesDelivery.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/SuppliesDelivery/SuppliesDelivery.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/SuppliesDeliveryGen.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/SuppliesDeliveryGen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/SuppliesInvoice/SuppliesInvoice.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/SuppliesInvoice/SuppliesInvoice.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/SupplyItems/SupplyItems.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/SupplyItems/SupplyItems.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/SupplyPayments/SupplyPayments.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/SupplyPayments/SupplyPayments.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/Users/User.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/Users/User.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/advanced-select-master.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/advanced-select-master.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/display-projects.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/display-projects.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/invoiceSinglePay.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/invoiceSinglePay.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/itemConfirmationWidget.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/itemConfirmationWidget.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/listings.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/listings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/projectView.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/projectView.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/singleSupplyView.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/singleSupplyView.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/singleUserView.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/singleUserView.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/singleWorksView.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/singleWorksView.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/pages/siteView.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/pages/siteView.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/routes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/app/AppBugReports.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/app/AppBugReports.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/app/AppItemOrders.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/app/AppItemOrders.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/app/AppNewUsers.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/app/AppNewUsers.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/app/AppWeeklySales.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/app/AppWeeklySales.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/pettyInstantViews/AppBugReports.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/pettyInstantViews/AppBugReports.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/products/ProductCard.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/products/ProductCard.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/reportShows/SingleReportItems.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/reportShows/SingleReportItems.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/user/UserListHead.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/sections/@dashboard/user/UserListHead.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/sections/authentication/login/LoginForm.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/sections/authentication/login/LoginForm.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ncpb-logs/src/sections/authentication/register/RegisterForm.js" beforeDir="false" afterPath="$PROJECT_DIR$/../ncpb-logs/src/sections/authentication/register/RegisterForm.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/server.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/server.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/controllers.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/controllers.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/database/database.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/database.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/models.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/models.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../ncpb-logs" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
   <component name="ProjectId" id="25ahOOWuAalRl67X562LdTpt4JD" />
-  <component name="PropertiesComponent">
-    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
-    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/ADMIN/Documents/ncpb-logs&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
+  }
+}</component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="fbfa9c64-274b-4267-b19f-7840c877006b" name="Changes" comment="" />
+      <created>1666166175038</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1666166175038</updated>
+      <workItem from="1666166177338" duration="8000" />
+      <workItem from="1666166202352" duration="175000" />
+      <workItem from="1666166851534" duration="11408000" />
+      <workItem from="1666180601258" duration="1013000" />
+      <workItem from="1666184214414" duration="635000" />
+      <workItem from="1666186462117" duration="38000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

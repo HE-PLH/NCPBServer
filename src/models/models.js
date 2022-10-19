@@ -105,13 +105,13 @@ let ItemsSchema = new Schema({
 let LogSchema = new Schema({
     Id: {
         type: String,
+        unique: true,
     },
     Name: {
         type: String
     },
     userSn: {
-        type: String,
-        unique: true,
+        type: String
     },
     deviceUserId: {
         type: String
@@ -149,7 +149,7 @@ function getSchemaObject(inputData) {
 }
 
 function addAutoIdIfShotlisted(inputData, table, mdl, res) {
-    const shotlistTables = ["game-types", "odd-types", "items"];
+    const shotlistTables = ["items"];
 
     const f = function (array, item) {
         if (array.length > 0) {
@@ -189,10 +189,16 @@ function addAutoIdIfShotlisted(inputData, table, mdl, res) {
             });
         })
     } else {
-        mdl.insertMany(inputData, function (data) {
-            res.send({info: `${table} item created successfully`});
-            console.log(`${table} item created successfully`);
-        });
+        console.log(inputData)
+        try {
+            mdl.insertMany(inputData, function (data, result) {
+                console.log(data)
+                res.send({info: `${table} item created successfully`});
+                console.log(`${table} item created successfully`);
+            });
+        } catch (e) {
+            console.log(e)
+        }
     }
 }
 
@@ -525,12 +531,25 @@ const getPeriodLogs = (req, res, mdl) => {
 
         SettingsModel.find({}, (err, settings) => {
 
+            let my_pairs = [];
+            settings.map(({Name, items}) => {
+                if (Name === "Working Hours") {
+                    my_pairs = items.reduce(function (result, value, index, array) {
+                        if (index % 2 === 0) {
+                            let _arr = array.slice(index, index + 2);
+                            let temp = [_arr[0].Name, _arr[1] ? _arr[1].Name : _arr[0].Time];
+                            result.push(temp);
+                        }
+                        return result;
+                    }, []);
+                }
+            })
             let result = {};
 
             const sortObject = o => Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {})
             let table_head = {};
 
-            let individualLogs = groupIn(docs)
+            let individualLogs = sortObject(groupIn(docs))
             result.groups = [];
             for (let i in individualLogs) {
                 let my_days = _days;
@@ -544,8 +563,9 @@ const getPeriodLogs = (req, res, mdl) => {
                     t["_id"] = individualLogs[i][0]._id;
                     t.items = [];
                     t["Variance"] = 0;
+                    t["LIEOReport"] = 0;
                     // t["Variance"] = "";
-                    let temp = groupIn(individualLogs[i], "userSn", "Date")
+                    let temp = sortObject(groupIn(individualLogs[i], "userSn", "Date"))
 
                     // temp_date[temp[0].Date] = {};
                     let len = 0;
@@ -595,8 +615,7 @@ const getPeriodLogs = (req, res, mdl) => {
                                 count++;
                             }*/
 
-
-                            let b_t_l = [["08:00:00 AM", "01:00:00 PM"], ["02:00:00 PM", "05:00:00 PM"]],
+                            let b_t_l = my_pairs,
                                 diff = 0;
 
                             // console.log(timePairsObj)
@@ -710,6 +729,641 @@ const getPeriodLogs = (req, res, mdl) => {
 
 
     });
+    // }
+};
+
+
+const getLateInAndEarlyOutPeriodLogs = (req, res, mdl) => {
+    let start_date = req.body.Start_date;
+    let end_date = req.body.End_date;
+
+    let date = new Date(end_date);
+    let date1 = new Date(start_date);
+
+
+    /*var a = moment(end_date);
+    var b = moment(start_date);
+    let _days = a.diff(b, 'days') // 1
+    console.log(_days)*/
+    let _days = 0;
+
+    const addDays = (date, days = 1) => {
+        const result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result;
+    };
+
+    const dateRange = (start, end, range = []) => {
+        if (start > end) return range;
+        const next = addDays(start, 1);
+        return dateRange(next, end, [...range, start]);
+    };
+
+    const range = dateRange(new Date(start_date), new Date(end_date));
+    for (let i = 0; i < range.length; i++) {
+        if (!isWeekend(new Date(range[i]))) {
+            _days++
+        }
+    }
+    console.log(_days)
+
+    LogsModel.find({}, (err, docs) => {
+        if (err) {
+            res.send({
+                message: "Error Occured",
+                info: docs,
+            });
+            // return 0;
+        }
+
+        if (docs === null || docs.length === 0) {
+            res.send({
+                message: "No Biometric Logs available",
+                info: docs,
+            });
+            // return 0;
+        }
+
+        docs = docs.filter((item) => {
+            let flag = false;
+            if (date1 <= new Date(item.Date) && date >= new Date(item.Date)) {
+                flag = true;
+            } /*else if (date === new Date(item.end_date)) {
+                        if (time < parseInt(item.End_time.replace(":", "")) && time > parseInt(item.Start_time.replace(":", ""))) {
+                            flag = true
+                        }
+                    }*/
+            return flag;
+        });
+
+
+        SettingsModel.find({}, (err, settings) => {
+
+            let my_pairs = [];
+            settings.map(({Name, items}) => {
+                if (Name === "Working Hours") {
+                    my_pairs = items.reduce(function (result, value, index, array) {
+                        if (index % 2 === 0) {
+                            let _arr = array.slice(index, index + 2);
+                            let temp = [_arr[0].Name, _arr[1] ? _arr[1].Name : _arr[0].Time];
+                            result.push(temp);
+                        }
+                        return result;
+                    }, []);
+                }
+            })
+            let result = {};
+
+            const sortObject = o => Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {})
+            let table_head = {};
+
+            let individualLogs = sortObject(groupIn(docs))
+            result.groups = [];
+            for (let i in individualLogs) {
+                let my_days = _days;
+                let t = {};
+                t["p/No"] = i;
+
+                if (individualLogs[i][0].Name && individualLogs[i][0].Name !== "ADMIN1") {
+                    t["Name"] = individualLogs[i][0].Name;
+                    // console.log(t["Name"])
+                    t["Id"] = individualLogs[i][0].Id;
+                    t["_id"] = individualLogs[i][0]._id;
+                    t.items = [];
+                    t["Variance"] = 0;
+                    t["LIEOReport"] = 0;
+                    // t["Variance"] = "";
+                    let temp = sortObject(groupIn(individualLogs[i], "userSn", "Date"))
+
+                    // temp_date[temp[0].Date] = {};
+                    let len = 0;
+
+                    for (let j in temp) {
+                        if (!isWeekend(new Date(j))) {
+                            // console.log(j);
+                            len++;
+                            if (!table_head.hasOwnProperty(j)) {
+                                table_head[j] = "String";
+                            }
+                            let temp_date = {};
+                            temp_date["Date"] = j;
+                            let orderedLogs = temp[j].sort((a, b) => {
+                                return new Date(a.Time) > new Date(b.Time);
+                            });
+
+                            temp_date["startTime"] = orderedLogs[0].Time;
+                            temp_date["endTime"] = orderedLogs[orderedLogs.length - 1].Time;
+                            let person_extremes = [[temp_date.startTime, temp_date.endTime]];
+                            if (temp_date["endTime"] === temp_date["startTime"]) {
+                                person_extremes[0][1] = temp_date["startTime"];
+                                temp_date["endTime"] = ""
+                            }
+
+
+                            t.items.push(temp_date);
+
+
+                            let timePairsObj = [];
+                            let time_pairs = [];
+                            let count = 0;
+
+                            timePairsObj = orderedLogs.reduce(function (result, value, index, array) {
+                                if (index % 2 === 0) {
+                                    let _arr = array.slice(index, index + 2);
+                                    let temp = [_arr[0].Time, _arr[1] ? _arr[1].Time : _arr[0].Time];
+                                    result.push(temp);
+                                }
+                                return result;
+                            }, []);
+
+
+                            let b_t_l = my_pairs,
+                                diff = 0;
+
+
+                            let extreme_times = [[b_t_l[0][0], b_t_l[b_t_l.length - 1][1]]];
+
+                            t["LIEOReport"] += computeValidHours(extreme_times, person_extremes);
+
+                            t["Variance"] += computeValidHours(b_t_l, timePairsObj);
+
+                        } else {
+                            // console.log("weekend here")
+                            // console.log(my_days)
+                            my_days -= 1;
+                            // console.log(my_days - 1)
+                        }
+                    }
+
+                    // console.log(my_days)
+                    // console.log(len)
+
+                    if (my_days >= len) {
+                        let _d = (my_days - len) * 8 * 60 * 60;
+                        // console.log(t["Variance"])
+                        t["Variance"] += _d;
+                        t["LIEOReport"] += _d;
+                    }
+                    if (t["LIEOReport"] <= 0) {
+
+                    } else {
+                        if (t["Variance"] === 0) {
+                            t["Variance"] = "Excellent Attendance";
+                            t["LIEOReport"] = "Excellent Attendance"
+                        } else {
+                            t["Variance"] = (secondsToDhms(t["Variance"]));
+                            t["LIEOReport"] = (secondsToDhms(t["LIEOReport"]));
+                        }
+                        result.groups.push(t)
+                    }
+                }
+
+            }
+            result.table_head = table_head;
+            result.LogsLength = docs.length;
+            result.Logs = [...docs];
+            let len = docs.length;
+            let counter = 0;
+            res.send(
+                {
+                    info: result
+                }
+            );
+        });
+
+
+    });
+    // }
+};
+
+const onSchedule = (req, res, mdl) => {
+    let start_date = req.body.Start_date;
+    let end_date = req.body.End_date;
+
+    let date = new Date(end_date);
+    let date1 = new Date(start_date);
+
+
+    /*var a = moment(end_date);
+    var b = moment(start_date);
+    let _days = a.diff(b, 'days') // 1
+    console.log(_days)*/
+    let _days = 0;
+
+    const addDays = (date, days = 1) => {
+        const result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result;
+    };
+
+    const dateRange = (start, end, range = []) => {
+        if (start > end) return range;
+        const next = addDays(start, 1);
+        return dateRange(next, end, [...range, start]);
+    };
+
+    const range = dateRange(new Date(start_date), new Date(end_date));
+    for (let i = 0; i < range.length; i++) {
+        if (!isWeekend(new Date(range[i]))) {
+            _days++
+        }
+    }
+    console.log(_days)
+
+    LogsModel.find({}, (err, docs) => {
+        if (err) {
+            res.send({
+                message: "Error Occured",
+                info: docs,
+            });
+            // return 0;
+        }
+
+        if (docs === null || docs.length === 0) {
+            res.send({
+                message: "No Biometric Logs available",
+                info: docs,
+            });
+            // return 0;
+        }
+
+        docs = docs.filter((item) => {
+            let flag = false;
+            if (date1 <= new Date(item.Date) && date >= new Date(item.Date)) {
+                flag = true;
+            } /*else if (date === new Date(item.end_date)) {
+                        if (time < parseInt(item.End_time.replace(":", "")) && time > parseInt(item.Start_time.replace(":", ""))) {
+                            flag = true
+                        }
+                    }*/
+            return flag;
+        });
+
+
+        SettingsModel.find({}, (err, settings) => {
+
+            let my_pairs = [];
+            settings.map(({Name, items}) => {
+                if (Name === "Working Hours") {
+                    my_pairs = items.reduce(function (result, value, index, array) {
+                        if (index % 2 === 0) {
+                            let _arr = array.slice(index, index + 2);
+                            let temp = [_arr[0].Name, _arr[1] ? _arr[1].Name : _arr[0].Time];
+                            result.push(temp);
+                        }
+                        return result;
+                    }, []);
+                }
+            })
+            let result = {};
+
+            const sortObject = o => Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {})
+            let table_head = {};
+
+            let individualLogs = sortObject(groupIn(docs))
+            result.groups = [];
+            for (let i in individualLogs) {
+                let my_days = _days;
+                let t = {};
+                t["p/No"] = i;
+
+                if (individualLogs[i][0].Name && individualLogs[i][0].Name !== "ADMIN1") {
+                    t["Name"] = individualLogs[i][0].Name;
+                    // console.log(t["Name"])
+                    t["Id"] = individualLogs[i][0].Id;
+                    t["_id"] = individualLogs[i][0]._id;
+                    t.items = [];
+                    t["Variance"] = 0;
+                    t["LIEOReport"] = 0;
+                    // t["Variance"] = "";
+                    let temp = sortObject(groupIn(individualLogs[i], "userSn", "Date"))
+
+                    // temp_date[temp[0].Date] = {};
+                    let len = 0;
+
+                    for (let j in temp) {
+                        if (!isWeekend(new Date(j))) {
+                            // console.log(j);
+                            len++;
+                            if (!table_head.hasOwnProperty(j)) {
+                                table_head[j] = "String";
+                            }
+                            let temp_date = {};
+                            temp_date["Date"] = j;
+                            let orderedLogs = temp[j].sort((a, b) => {
+                                return new Date(a.Time) > new Date(b.Time);
+                            });
+
+                            temp_date["startTime"] = orderedLogs[0].Time;
+                            temp_date["endTime"] = orderedLogs[orderedLogs.length - 1].Time;
+                            let person_extremes = [[temp_date.startTime, temp_date.endTime]];
+                            if (temp_date["endTime"] === temp_date["startTime"]) {
+                                person_extremes[0][1] = temp_date["startTime"];
+                                temp_date["endTime"] = ""
+                            }
+
+
+                            t.items.push(temp_date);
+
+
+                            let timePairsObj = [];
+                            let time_pairs = [];
+                            let count = 0;
+
+                            timePairsObj = orderedLogs.reduce(function (result, value, index, array) {
+                                if (index % 2 === 0) {
+                                    let _arr = array.slice(index, index + 2);
+                                    let temp = [_arr[0].Time, _arr[1] ? _arr[1].Time : _arr[0].Time];
+                                    result.push(temp);
+                                }
+                                return result;
+                            }, []);
+
+
+                            let b_t_l = my_pairs,
+                                diff = 0;
+
+
+                            let extreme_times = [[b_t_l[0][0], b_t_l[b_t_l.length - 1][1]]];
+
+                            t["LIEOReport"] += computeValidHours(extreme_times, person_extremes);
+
+                            t["Variance"] += computeValidHours(b_t_l, timePairsObj);
+
+                        } else {
+                            // console.log("weekend here")
+                            // console.log(my_days)
+                            my_days -= 1;
+                            // console.log(my_days - 1)
+                        }
+                    }
+
+                    // console.log(my_days)
+                    // console.log(len)
+
+                    if (my_days >= len) {
+                        let _d = (my_days - len) * 8 * 60 * 60;
+                        // console.log(t["Variance"])
+                        t["Variance"] += _d;
+                        t["LIEOReport"] += _d;
+                    }
+                    if (t["LIEOReport"] > 0) {
+
+                    } else {
+                        if (t["Variance"] === 0) {
+                            t["Variance"] = "Excellent Attendance";
+                            t["LIEOReport"] = "Excellent Attendance"
+                        } else {
+                            t["Variance"] = (secondsToDhms(t["Variance"]));
+                            t["LIEOReport"] = (secondsToDhms(t["LIEOReport"]));
+                        }
+                        result.groups.push(t)
+                    }
+                }
+
+            }
+            result.table_head = table_head;
+            result.LogsLength = docs.length;
+            result.Logs = [...docs];
+            let len = docs.length;
+            let counter = 0;
+            res.send(
+                {
+                    info: result
+                }
+            );
+        });
+
+
+    });
+    // }
+};
+
+const getIndividualPeriodLogs = (req, res, mdl) => {
+    let start_date = req.body.Start_date;
+    let end_date = req.body.End_date;
+    let id = req.body.Id;
+
+    let date = new Date(end_date);
+    let date1 = new Date(start_date);
+
+
+    /*var a = moment(end_date);
+    var b = moment(start_date);
+    let _days = a.diff(b, 'days') // 1
+    console.log(_days)*/
+    let _days = 0;
+
+    const addDays = (date, days = 1) => {
+        const result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result;
+    };
+
+    const dateRange = (start, end, range = []) => {
+        if (start > end) return range;
+        const next = addDays(start, 1);
+        return dateRange(next, end, [...range, start]);
+    };
+
+    const range = dateRange(new Date(start_date), new Date(end_date));
+    for (let i = 0; i < range.length; i++) {
+        if (!isWeekend(new Date(range[i]))) {
+            _days++
+        }
+    }
+    console.log(_days)
+
+    console.log(id)
+
+
+    LogsModel.find({_id: id}, (err, docs) => {
+        if (err) {
+            res.send({
+                message: "Error Occured",
+                info: docs,
+            });
+            // return 0;
+        }
+
+        if (docs === null || docs.length === 0) {
+            res.send({
+                message: "No Biometric Logs available",
+                info: docs,
+            });
+            // return 0;
+        }
+
+        console.log(docs)
+        LogsModel.find({deviceUserId: docs[0].deviceUserId}, (err, docs) => {
+            console.log(docs)
+            if (err) {
+                res.send({
+                    message: "Error Occured",
+                    info: docs,
+                });
+                // return 0;
+            }
+
+            if (docs === null || docs.length === 0) {
+                res.send({
+                    message: "No Biometric Logs available",
+                    info: docs,
+                });
+                // return 0;
+            }
+
+            docs = docs.filter((item) => {
+                let flag = false;
+                if (date1 <= new Date(item.Date) && date >= new Date(item.Date)) {
+                    flag = true;
+                } /*else if (date === new Date(item.end_date)) {
+                        if (time < parseInt(item.End_time.replace(":", "")) && time > parseInt(item.Start_time.replace(":", ""))) {
+                            flag = true
+                        }
+                    }*/
+                return flag;
+            });
+
+
+            SettingsModel.find({}, (err, settings) => {
+
+                let my_pairs = [];
+                settings.map(({Name, items}) => {
+                    if (Name === "Working Hours") {
+                        my_pairs = items.reduce(function (result, value, index, array) {
+                            if (index % 2 === 0) {
+                                let _arr = array.slice(index, index + 2);
+                                let temp = [_arr[0].Name, _arr[1] ? _arr[1].Name : _arr[0].Time];
+                                result.push(temp);
+                            }
+                            return result;
+                        }, []);
+                    }
+                })
+                let result = {};
+
+                const sortObject = o => Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {})
+                let table_head = {};
+
+                let individualLogs = sortObject(groupIn(docs))
+                result.groups = [];
+                for (let i in individualLogs) {
+                    let my_days = _days;
+                    let t = {};
+                    t["p/No"] = i;
+
+                    if (individualLogs[i][0].Name && individualLogs[i][0].Name !== "ADMIN1") {
+                        t["Name"] = individualLogs[i][0].Name;
+                        // console.log(t["Name"])
+                        t["Id"] = individualLogs[i][0].Id;
+                        t["_id"] = individualLogs[i][0]._id;
+                        t.items = [];
+                        t.timeObj = [];
+                        t["Variance"] = 0;
+                        // t["Variance"] = "";
+                        let temp = sortObject(groupIn(individualLogs[i], "userSn", "Date"))
+
+                        // temp_date[temp[0].Date] = {};
+                        let len = 0;
+
+                        for (let j in temp) {
+                            if (!isWeekend(new Date(j))) {
+                                // console.log(j);
+                                len++;
+                                if (!table_head.hasOwnProperty(j)) {
+                                    table_head[j] = "String";
+                                }
+                                let temp_date = {};
+                                temp_date["Date"] = j;
+                                let orderedLogs = temp[j].sort((a, b) => {
+                                    return new Date(a.Time) > new Date(b.Time);
+                                });
+
+                                temp_date["startTime"] = orderedLogs[0].Time;
+                                temp_date["endTime"] = orderedLogs[orderedLogs.length - 1].Time;
+                                let person_extremes = [[temp_date.startTime, temp_date.endTime]];
+                                if (temp_date["endTime"] === temp_date["startTime"]) {
+                                    person_extremes[0][1] = temp_date["startTime"];
+                                    temp_date["endTime"] = ""
+                                }
+
+
+                                t.items.push(temp_date);
+
+
+                                let timePairsObj = [];
+                                let time_pairs = [];
+                                let count = 0;
+
+                                timePairsObj = orderedLogs.reduce(function (result, value, index, array) {
+                                    if (index % 2 === 0) {
+                                        let _arr = array.slice(index, index + 2);
+                                        let temp = [_arr[0].Time, _arr[1] ? _arr[1].Time : _arr[0].Time];
+                                        result.push(temp);
+                                    }
+                                    return result;
+                                }, []);
+
+
+                                t.timeObj.push(timePairsObj);
+                                let b_t_l = my_pairs,
+                                    diff = 0;
+
+                                let extreme_times = [[b_t_l[0][0], b_t_l[b_t_l.length - 1][1]]];
+
+                                t["LIEOReport"] += computeValidHours(extreme_times, person_extremes);
+
+                                t["Variance"] += computeValidHours(b_t_l, timePairsObj);
+
+                            } else {
+                                // console.log("weekend here")
+                                // console.log(my_days)
+                                my_days -= 1;
+                                // console.log(my_days - 1)
+                            }
+                        }
+
+                        // console.log(my_days)
+                        // console.log(len)
+
+                        if (my_days >= len) {
+                            let _d = (my_days - len) * 8 * 60 * 60;
+                            // console.log(t["Variance"])
+                            t["Variance"] += _d;
+                            t["LIEOReport"] += _d;
+                        }
+
+                        if (t["LIEOReport"] === 0) {
+
+                        } else {
+                            if (t["Variance"] === 0) {
+                                t["Variance"] = "Excellent Attendance";
+                                t["LIEOReport"] = "Excellent Attendance"
+                            } else {
+                                t["Variance"] = (secondsToDhms(t["Variance"]));
+                                t["LIEOReport"] = (secondsToDhms(t["LIEOReport"]));
+                            }
+                            result.groups.push(t)
+                        }
+                    }
+
+                }
+                result.table_head = table_head;
+                result.LogsLength = docs.length;
+                result.Logs = [...docs];
+                let len = docs.length;
+                let counter = 0;
+                res.send(
+                    {
+                        info: result
+                    }
+                );
+            });
+
+
+        });
+    })
     // }
 };
 
@@ -1028,5 +1682,8 @@ module.exports = {
     ItemsModel,
     LogsModel,
     getPeriodLogs,
-    SettingsModel
+    getLateInAndEarlyOutPeriodLogs,
+    SettingsModel,
+    getIndividualPeriodLogs,
+    onSchedule
 };
